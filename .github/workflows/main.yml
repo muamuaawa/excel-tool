@@ -1,6 +1,5 @@
-name: Build Windows EXE
+name: Build Windows EXE (压缩优化)
 
-# 添加权限配置
 permissions:
   contents: write
 
@@ -11,22 +10,27 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # 升级到 v4
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5  # 升级到 v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install UPX (压缩工具)
+        run: |
+          choco install upx -y
+          echo "UPX installed"
+
+      - name: Install Python依赖
         run: |
           pip install pandas openpyxl pyinstaller
 
-      - name: Build EXE
-        run: pyinstaller --onefile --console --name excelhelper main.py  # 确保此处脚本名正确（比如你的 main.py）
+      - name: Build EXE (带UPX压缩)
+        run: pyinstaller --onefile --console --upx-dir="C:/ProgramData/chocolatey/bin" --name Excel合并工具 main.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4  # 升级到 v4
+        uses: actions/upload-artifact@v4
         with:
           name: windows-exe
           path: dist/
